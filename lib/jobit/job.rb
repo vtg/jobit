@@ -33,7 +33,7 @@ module Jobit
       if defined?(Rails)
         Logger.new("#{Rails.root.to_s}/log/jobit.log", shift_age = 7, shift_size = 1048576)
       else
-        Logger.new(File.dirname(__FILE__) + "/../../log/jobit.log")
+        Logger.new('/dev/null')
       end
     end
 
