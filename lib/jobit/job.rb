@@ -9,7 +9,7 @@ module Jobit
       if defined?(Rails)
         "#{Rails.root.to_s}/tmp/jobit"
       else
-        File.dirname(__FILE__) + "/../../tmp/jobit"
+        "/tmp/jobit"
       end
     end
 
