@@ -16,5 +16,6 @@ Gem::Specification.new do |gem|
   gem.version       = Jobit::VERSION
   
   gem.add_dependency "daemons"
+  gem.add_development_dependency "rake"
   gem.add_development_dependency "rspec"
 end
