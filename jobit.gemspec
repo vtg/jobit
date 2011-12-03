@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["v.t.g.m.b.x@gmail.com"]
   gem.description   = %q{Process background jobs in queue.}
   gem.summary       = %q{Background jobs processing}
-  gem.homepage      = ""
+  gem.homepage      = "http://github.com/vtg/jobit"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
