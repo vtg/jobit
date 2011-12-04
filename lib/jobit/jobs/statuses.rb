@@ -48,6 +48,14 @@ module Jobit
           :failed_at => failed_at
         }
       end
+
+      def time_to_run?
+        if tries == 0
+          Time.now.to_f >= run_at.to_f
+        else
+          true
+        end
+      end
     end
   end
 end
