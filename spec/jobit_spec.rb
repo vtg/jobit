@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 module JobitItems
 
-  def good_job(opt1, opt2)
+  def good_job_task(opt1, opt2)
     set_progress(10)
     unless opt1 == 'val1'
       raise(NoMethodError, 'wrong arguments 0')
@@ -14,7 +14,7 @@ module JobitItems
     set_progress(100)
   end
 
-  def bad_job(text)
+  def bad_job_task(text)
     add_message "start"
     set_progress(10)
     add_message "end"
@@ -23,7 +23,20 @@ module JobitItems
 end
 
 describe Jobit do
-  describe "Job" do
+
+  after(:all) do
+    begin
+      files = Jobit::Storage.all_files
+      for file in files
+        File.delete(file)
+      end
+      Dir.delete(Jobit::Job.jobs_path)
+    rescue
+      nil
+    end
+  end
+
+  describe "Jobit::Job basic stuff" do
 
     before(:each) do
       @job_name = 'job-1'
@@ -35,14 +48,6 @@ describe Jobit do
 
     after(:each) do
       @new_job.destroy
-    end
-
-    after(:all) do
-      begin
-        Dir.delete(Jobit::JOBS_PATH)
-      rescue
-        nil
-      end
     end
 
     it "creates new job" do
@@ -130,11 +135,11 @@ describe Jobit do
 
     it 'adds message' do
       @new_job.message.should eq('')
-      @new_job.add_message('hello',true)
+      @new_job.add_message('hello', true)
       @new_job.message.should eq('hello')
       job = Jobit::Job.find_by_name(@job_name)
       job.message.should eq('hello')
-      @new_job.add_message(' there',true)
+      @new_job.add_message(' there', true)
       @new_job.message.should eq('hello there')
       job = Jobit::Job.find_by_name(@job_name)
       job.message.should eq('hello there')
@@ -145,6 +150,10 @@ describe Jobit do
       job = Jobit::Job.find_by_name(@job_name)
       job.should eq(nil)
     end
+
+  end
+
+  describe "Jobit::Job work_off and different runs" do
 
     it 'running good job 5 times' do
       job = Jobit::Job.add('good_job', :good_job, 'val1', 'val2') { {
@@ -204,7 +213,6 @@ describe Jobit do
     end
 
     it 'work_off test' do
-      @new_job.destroy
       for i in (0..5)
         Jobit::Job.add("work_off_#{i}", :good_job, 'val1', 'val2') { {
           :priority => rand(6),
@@ -215,14 +223,26 @@ describe Jobit do
         :priority => 2,
         :keep => true
       } }
-
-      Jobit::Job.work_off
       jobs = []
       for i in (0..5)
-        job = Jobit::Job.find_by_name("work_off_#{i}")
-        job.status.should eq('complete'), " #{job}"
-        job.destroy
-        job.id.should eq(nil)
+        jobs[i] = Jobit::Job.find_by_name("work_off_#{i}")
+        jobs[i].tries.should eq(0), "#{jobs[i]}"
+        jobs[i].status.should eq('new'), "#{jobs[i]}"
+        jobs[i].run_at.should_not eq(nil)
+        jobs[i].started_at.should eq(nil)
+        jobs[i].run_at.should be < Time.now.to_f
+      end
+
+      Jobit::Job.work_off
+
+      jobs = []
+      for i in (0..5)
+        jobs[i] = Jobit::Job.find_by_name("work_off_#{i}")
+        jobs[i].run_at.should be < Time.now.to_f
+        jobs[i].tries.should eq(1), "#{jobs[i]}"
+        jobs[i].status.should eq('complete'), "#{jobs[i]}"
+        jobs[i].destroy
+        jobs[i].id.should eq(nil)
       end
 
       job_failed = Jobit::Job.find_by_name('work_off_bad')
@@ -232,5 +252,35 @@ describe Jobit do
 
     end
 
+    it 'new job should have run_at after creation and started_at after running' do
+      job = Jobit::Job.add('good_job_keep_11', :good_job, 'val1', 'val2') { {
+        :keep => true
+      } }
+      job.run_at.should_not eq(nil)
+      job.run_job
+      job.started_at.should_not eq(nil)
+      job = Jobit::Job.find_by_name('good_job_keep_11')
+      job.tries.should eq(1)
+      job.run_at.should_not eq(nil)
+      job.started_at.should_not eq(nil)
+      job.destroy
+    end
+
+    it 'Job should not be processed if run_at set to later time' do
+      run_at_time = Time.now.to_f + 10000
+      job = Jobit::Job.add('test_run_at', :good_job, 'val1', 'val2') { {
+        :run_at => run_at_time
+      } }
+      job.run_at.should eq(run_at_time)
+
+      Jobit::Job.work_off
+
+      job = Jobit::Job.find_by_name('test_run_at')
+      job.tries.should eq(0)
+      job.run_at.should eq(run_at_time)
+      job.started_at.should eq(nil)
+      job.destroy
+    end
   end
+
 end
