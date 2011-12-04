@@ -20,11 +20,11 @@ Create jobs file app/model/jobit_items.rb and put your tasks there:
 ```ruby
 method JobitItems
 
-  def some_long_running_task_without_response(arg)
+  def job_without_output_task(arg)
     sleep 60
   end
 
-  def some_long_running_task_with_response(arg1, arg2)
+  def job_with_output_task(arg1, arg2)
     add_message("job #{name} started\n")
     set_progress(10)
     sleep 60
@@ -37,6 +37,14 @@ method JobitItems
 end
 ```
 
+Jobs should be defined as "job_name" + "_task" suffix:
+
+```ruby
+def new_job_task
+end
+```
+
+
 ###Running worker to process the jobs queue
 
 ```ruby
@@ -48,10 +56,10 @@ rake jobit:work
 
 ```ruby
 #job will be added to queue and processed. After successful processing it will be destroyed
-new_job = Jobit::Job.add("job_name", :some_long_running_task_without_response, 'val1')
+new_job = Jobit::Job.add("job_name", :job_without_output, 'val1')
 
-#job will be added to queue and processed. After processing it wont be destroyed so you can see its messages and progress
-new_job = Jobit::Job.add("job_name", :some_long_running_task_with_response, 'val1', 'val2'){{ :keep => true }}
+#job will be added to queue and processed. After processing wont be destroyed so you can see outputs from it
+new_job = Jobit::Job.add("job_name", :job_with_output, 'val1', 'val2'){{ :keep => true }}
 ```
 
 ###Monitoring job progress and responses
@@ -61,7 +69,7 @@ new_job = Jobit::Job.add("job_name", :some_long_running_task_with_response, 'val
 job = Jobit::Job.find_by_name('job_name')
 
 job.status #current job status
-job.message #job responses if defined in job
+job.message #job responses if job sent any
 job.progress #job progress
 job.error #job error if status is "failed"
 ```
