@@ -39,15 +39,20 @@ module Jobit
 
     def process_job(args)
       begin
-        logger.info "* [JOB] aquiring lock on #{name}"
+        logger.info "* [JOB:#{name}] acquiring lock"
         runtime = Benchmark.realtime do
-          set_status 'running'
-          set_start_time
-          self.send(object,*args)
-          set_status 'complete'
-          set_stop_time
+          self.status = 'running'
+          self.started_at = Time.now.to_f
+          update
+
+          self.send("#{object}_task",*args)
+
+          self.status = 'complete'
+          self.progress = 100
+          self.stopped_at = Time.now.to_f
+          update
         end
-        logger.info "* [JOB] #{name} completed after %.4f" % runtime
+        logger.info "* [JOB:#{name}]  completed after %.4f" % runtime
       rescue Exception => e
         log_exception(e)
         msg = "#{e.message}\n\n#{e.backtrace.join("\n")}"
@@ -89,7 +94,7 @@ module Jobit
       self.message = ''
       self.progress = 0
       self.priority = 0
-      self.run_at = nil
+      self.run_at = id
       self.repeat = 0
       self.repeat_delay = 0
       self.created_at = id
@@ -115,7 +120,7 @@ module Jobit
       if failed?
         if tries < MAX_ATTEMPTS
           self.tries += 1
-          self.run_at = Time.now + (tries ** 4) + 5
+          self.run_at = Time.now.to_f + (tries ** 4) + 5
           self.status = 'new'
           unlock!
           update
@@ -127,8 +132,6 @@ module Jobit
         end
       elsif complete?
         if keep?
-          set_progress(100)
-          set_stop_time
           unlock!
         else
           destroy
