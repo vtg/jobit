@@ -68,8 +68,6 @@ module Jobit
         increase_tries
         sleep delay if delay > 0
       end
-      #p self.class.send(:method_defined?, :perform)
-      #p self.class.send(:undef_method, :perform)
       cleanup
     end
 
