@@ -14,7 +14,6 @@ namespace :jobit do
 
   desc "Start a Jobit worker."
   task :work => :environment do
-    p Rails.root
     Jobit::Worker.new().start
   end
 end
