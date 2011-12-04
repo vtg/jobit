@@ -1,3 +1,9 @@
+## v0.0.4
+
+* Updating jobs processing
+* jobs listed in jobit_items should have suffix "_task"
+
+
 ## v0.0.3
 
 * README updated
