@@ -64,12 +64,12 @@ module Jobit
     # Jobit::Job.add(name, object, *args) {{options}}
     # options:
     #   :priority => the job priority (Integer)
-    #   :run_after => run job after some time from now ex: :run_after => 4.hours
+    #   :run_at => run job at some time ex: :run_at => Time.now + 4.hours
     #   :schedule => run job at some time. ex: :schedule_at => "16:00"
     #   :repeat => how many times to repeat the job (Integer)
     #   :repeat_delay => delay in seconds before next repeat
     def self.add(name, object, *args, &block)
-      unless JobitItems.method_defined?(object)
+      unless JobitItems.method_defined?("#{object}_task")
         raise ArgumentError, "Can't add job #{object}. It's not defined in jobs."
       end
 
@@ -88,10 +88,14 @@ module Jobit
       num.times do
         jobs = self.where({:status => 'new'})
         break unless jobs.size > 0
-        res = jobs.first.run_job
+        job = jobs.first
+        next unless job.time_to_run?
+        res = jobs.first.run_job(self.worker_name)
+        next if res.nil?
         complete += res[0]
         failed += res[1]
         reissued += res[2]
+        job = nil
         break if $exit
       end
       [complete, failed, reissued]
