@@ -53,7 +53,6 @@ module Jobit
       end
 
       def lock!(worker_name)
-        self.run_at= Time.now.to_f
         self.locked_at= Time.now.to_f
         self.locked_by= worker_name
         update
