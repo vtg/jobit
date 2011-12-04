@@ -89,5 +89,6 @@ rake jobit:clear # destroying all jobs in the queue.
 rake jobit:clear_failed # destroying only failed jobs in the queue.
 ```
 
+*More details coming soon*
 
 
