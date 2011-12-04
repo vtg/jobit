@@ -1,7 +1,11 @@
-## v0.0.1
+## v0.0.3
 
-* initial release
+* README updated
 
 ## v0.0.2
 
 * updated gem homepage
+
+## v0.0.1
+
+* initial release
