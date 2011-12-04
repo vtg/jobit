@@ -4,7 +4,8 @@ module Jobit
 
     def self.all_files
       Dir.mkdir(Jobit::Job.jobs_path) unless Dir.exist?(Jobit::Job.jobs_path)
-      Dir.glob("#{Jobit::Job.jobs_path}/*").find_all { |x| File.file? x }
+      arr = Dir.glob("#{Jobit::Job.jobs_path}/*").find_all { |x| File.file? x }
+      arr.sort
     end
 
     def self.destroy_all
