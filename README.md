@@ -61,7 +61,7 @@ new_job = Jobit::Job.add("job_name", :some_long_running_task_with_response, 'val
 job = Jobit::Job.find_by_name('job_name')
 
 job.status #current job status
-job.message #job responses in defined in job
+job.message #job responses if defined in job
 job.progress #job progress
 job.error #job error if status is "failed"
 ```
