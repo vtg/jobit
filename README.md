@@ -20,11 +20,11 @@ Create jobs file app/model/jobit_items.rb and put your tasks there:
 ```ruby
 method JobitItems
 
-  def some_long_running_task_without_response(arg1, arg2)
+  def some_long_running_task_without_response(arg)
     sleep 60
   end
 
-  def some_long_running_task_with_response(arg)
+  def some_long_running_task_with_response(arg1, arg2)
     add_message("job #{name} started\n")
     set_progress(10)
     sleep 60
