@@ -1,3 +1,7 @@
+## v0.0.5
+
+* Fixing Mysql Closed error when forking process with config.cache_classes true
+
 ## v0.0.4
 
 * Updating jobs processing
