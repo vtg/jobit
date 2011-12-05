@@ -61,6 +61,13 @@ module Jobit
     end
 
     def run(worker_name = nil)
+
+      begin
+        # releasing connection if started in production environment with caching enabled
+        ActiveRecord::Base.connection_pool.release_connection
+      rescue ::Exception
+      end
+
       Dir.chdir(Rails.root)
 
       # Re-open file handles
