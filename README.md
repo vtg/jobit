@@ -82,7 +82,7 @@ in routes.rb add:
 mount Jobit::Engine => "/jobs"
 ```
 
-now your can see the status of job in your browser
+now your can see a status of the job in your browser
 
 ```ruby
 http://127.0.0.1:3000/jobs/job_name
